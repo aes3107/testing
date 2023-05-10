@@ -1,0 +1,260 @@
+openapi: 3.0.0
+info:
+  version: 3.1.0
+  title: IVR Pharmacy Prescription API
+  x-api-type: rest
+  x-classification: private
+  x-consumption-domain: external
+  description: |
+    An API provides information that pertains to a specific prescription ID based on the information requested by the consumer.
+    
+    Change History:
+    
+    | Date     | Changed By |Description | 
+    |--------------|-----------|------------|
+    | 5/10/2023      |  Harshal Vadnere |Created Open Spec for Pharmacy Prescription API |
+  
+
+  contact:
+    name: 'IVR Excalibur'
+    email: 'IVRExcalibur@humana.com'
+servers:
+  - url: 'https://{ServerName}/{ApiVersion}/'
+    description: The server URL for v2 Consumer APIs
+    variables:
+      ServerName:
+        default: dev-hapi-ugw1.humana.com:443
+        description: Name of the server
+        enum:
+          - dev-hapi-ugw1.humana.com:443
+          - int-hapi.humana.com:443
+          - qa-apis.humana.com
+          - apis.humana.com
+      BasePath:
+        description: Base path and folder for the API
+        default: details
+      ApiVersion:
+        description: API version in URL
+        default: v3.1
+        
+
+security:
+  - bearerAuth: []
+paths:
+
+  '/details':
+    parameters: 
+      - name: MemberIdentityQualifier
+        in: request
+        description: This field will contain the qualifier for search criteria..
+        schema:
+          type: string
+        required: true
+        example: '{"Request": {"MemberDetail": {"MemberIdentityQualifier": "HumanaMemberID","MemberIdentity": "H14865713","DependentCode": "00","DateOfBirth": "1943-12-17"}}}'
+          
+    post:
+      tags:
+        - details Method.
+      summary: Read IVR Business Hrs Open for entered DNIS or not.
+      description: An API provides information that pertains to a specific prescription ID based on the information requested by the consumer.
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Trace-Id:
+              schema:
+                type: string
+              description: It will return script details with refilable status
+          content:
+            application/json:
+              schema:
+                  allOf:
+                    - example:
+                        ScriptKey: 234567890,
+						ScriptState: Refillable
+                        ResponseMetadata:
+                          Duration:  1477
+                          Status: S
+                          Timestamp: '2023-04-21T20:50:47.1529847Z'
+        '401':
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                allOf:
+                    - example:
+                        Response:
+                          ResponseMetadata:
+                            Duration:  123
+                            Status: E
+                            Timestamp: '2023-04-21T20:50:47.1529847Z'
+                            Messages:
+                            - Code: "101"
+                              Description: "Unauthorized"
+                              Type: E
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                allOf:
+                - example:
+                        Response:
+                          ResponseMetadata:
+                            Duration:  123
+                            Status: E
+                            Timestamp: '2023-04-21T20:50:47.1529847Z'
+                            Messages:
+                            - Code: "900"
+                              Description: "Resource Not Found"
+                              Type: E
+        
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      description: JWT-based authorization token, to be provided as a bearer token
+      scheme: bearer
+      bearerFormat: JWT
+    OpenID:
+      type: openIdConnect
+      openIdConnectUrl: https://api.humana.com/.well-known/openid-configuration
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://api.humana.com/oauth2/authorize
+          tokenUrl: https://dev-auth.humana.com/auth/oauth2/company_realm_b/access_token
+          scopes:
+            read: Grants read access
+            write: Grants write access
+            admin: Grants access to admin operations      
+  parameters:
+    MemberIdentityQualifier:
+      in: path
+      name: MemberIdentityQualifier
+      schema:
+        type: string
+      description: This field will contain the qualifier for search criteria
+      example: MemberIdentityQualifier: HumanaMemberID
+      required: true
+	MemberIdentity:
+      in: path
+      name: MemberIdentity
+      schema:
+        type: string
+      description: This field will contain the value for supplied MemberIdentityQualifier
+      example: MemberIdentity: H12345678
+      required: true
+	DependentCode:
+      in: path
+      name: DependentCode
+      schema:
+        type: string
+      description: Member dependent code This is needed only if HumanaMemberID is provided in input.
+      example: DependentCode: 00
+      required: false
+	DateOfBirth:
+      in: path
+      name: DateOfBirth
+      schema:
+        type: date
+      description: Date of Birth is needed only if HumanaMemberID is provided in input.
+      example: DateOfBirth: 1999-05-24
+      required: false
+  schemas:
+    Request:
+      description: This is API Request.
+      properties:
+        Request:
+          type: object
+          properties:
+            MemberIdentityQualifier:
+              type: string
+              description: This field will contain the qualifier for search criteria
+			MemberIdentity:
+              type: string
+              description: This field will contain the value for supplied MemberIdentityQualifier
+            DependentCode:
+              type: string
+              description: Member dependent code This is needed only if HumanaMemberID is provided in input
+			DateOfBirth:
+              type: date
+              description: Date of Birth is needed only if HumanaMemberID is provided in input
+          example: '{"Request": {"MemberDetail": {"MemberIdentityQualifier": "HumanaMemberID","MemberIdentity": "H14865713","DependentCode": "00","DateOfBirth": "1943-12-17"}}}'
+    
+    Response-Success:
+      description: This is API response and will have below fields.
+      properties:
+        Response:
+          type: object
+          properties:
+            Customer:
+              type: Customer
+              description: The Customer in which prescriptions belong to.
+              example: 'Customer {}'
+              
+            ResponseMetadata:
+              type: object
+              properties:
+                Timestamp:
+                  type: string
+                  description: The time and date in which this service as completed.
+                  example: '"Timestamp":"2023-04-21T20:50:47.1529847Z"'
+          
+                Duration:
+                  type: integer
+                  description: In milliseconds, the length of time it took to process the request.
+                  example: '"Duration":1477'
+          
+                Status:
+                  type: string
+                  description: Status of the service request.
+                  example: '"Status":"S"'
+            
+          example: '{"Response":{"ResponseMetadata":{"Timestamp":"2023-04-21T20:50:47.1529847Z","Duration":1477,"Status":"S"}}}}'
+          
+    Response-Error:
+      description: This is API response and will have below fields.
+      properties:
+        Response:
+          type: object
+          properties:
+            IsOpen:
+              type: boolean
+              description: Returns false in case of Error.
+              example: IsOpen:false
+              
+            ResponseMetadata:
+              type: object
+              example: '"Timestamp":"2023-04-21T20:50:47.1529847Z"'
+              properties:
+                Timestamp:
+                  type: string
+                  description: The time and date in which this service as completed.
+                  example: '"Timestamp":"2023-04-21T20:50:47.1529847Z"'
+          
+                Status:
+                  type: string
+                  description: Status of the service request.
+                  example: '"Status":"E"'
+          
+            Messages:
+              type: object
+              properties:
+                Code:
+                  type: string
+                  description: Error, or warning, code that describes the error that occurred.
+                  example: '"Code":"900"'
+          
+                Type:
+                  type: string
+                  description: A description of the type of Fault that occurred. Type can be E (Error) or W (Warning).
+                  example: '"Type":"E"'
+          
+                Description:
+                  type: string
+                  description: Description of the Error/Warning that occurred.
+                  example: '"Description":"Internal Server Error "'
+
+          example: '{"Response":{"ResponseMetadata":{"Timestamp":"2023-04-21T20:50:47.1529847Z","Duration":1477,"Status":"S"}}}}'

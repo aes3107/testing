@@ -1,0 +1,17 @@
+repoMetaData:
+  version: 1
+  platform: github
+  organization: humana
+  project: Technology-Advancement-EMU
+  repositoryType: git
+  repository: apigee-pharmacy.prescription-oas
+  changeTemplateId: VAZURE-APPSVC000000
+  #sonarqubeProjectKey: humana-apigee-pharmacy.prescription-oas
+
+  serviceNowAssociatedRecords:
+    # Specify one of the following, as appropriate for your use case.
+    # Note the app ID will always be 'APPSVC' followed by 6 numbers
+    - type: AppService
+      id: APPSVC000000
+      description: This repo will hold the open API specifications for IVR lob
+      technology: .Net
