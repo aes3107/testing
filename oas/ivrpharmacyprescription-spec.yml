@@ -10,9 +10,9 @@ info:
     
     Change History:
     
-    | Date     | Changed By |Description | 
-    |--------------|-----------|------------|
-    | 5/10/2023      |  Harshal Vadnere |Created Open Spec for Pharmacy Prescription API |
+    | Date           | Changed By       | Description                                     | 
+    |----------------|------------------|-------------------------------------------------|
+    | 5/10/2023      | Harshal Vadnere  | Created Open Spec for Pharmacy Prescription API.|
   
 
   contact:
@@ -45,7 +45,7 @@ paths:
   '/details':
     parameters: 
       - name: MemberIdentityQualifier
-        in: request
+        in: query
         description: This field will contain the qualifier for search criteria..
         schema:
           type: string
@@ -70,7 +70,7 @@ paths:
               schema:
                   allOf:
                     - example:
-                        ScriptKey: 234567890						            
+                        ScriptKey: 234567890                        
                         ResponseMetadata:
                           Duration:  1477
                           Status: S
@@ -152,16 +152,15 @@ components:
         type: string
       description: Member dependent code This is needed only if HumanaMemberID is provided in input
       example: 'DependentCode: 00'
-      required: false
+      required: true
     DateOfBirth:
       in: path
       name: DateOfBirth
       schema:
-        type: date
+        type: string
       description: Date of Birth is needed only if HumanaMemberID is provided in input
       example: 'DateOfBirth: 1999-05-24'
       required: false
-
   schemas:
     Request:
       description: This is API Request.
@@ -179,7 +178,7 @@ components:
               type: string
               description: Member dependent code This is needed only if HumanaMemberID is provided in input
             DateOfBirth:
-              type: date
+              type: string
               description: Date of Birth is needed only if HumanaMemberID is provided in input
 
     Response-Success:
@@ -189,7 +188,7 @@ components:
           type: object
           properties:
             Customer:
-              type: Customer
+              type: object
               description: The Customer in which prescriptions belong to.
               example: 'Customer {}'
               
